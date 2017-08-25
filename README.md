@@ -1,6 +1,6 @@
 The home of the still-to-be-written TAsk LIst GENerator, aka taligen.
 
-== To build on Arch Linux ==
+# To build on Arch Linux
 
 1. On your Arch Linux development machine, clone this repository:
 ```
@@ -13,12 +13,12 @@ cd taligen
 makepkg
 ```
 
-== To install on Arch Linux or UBOS ==
+# To install on Arch Linux or UBOS
 ```
 sudo pacman -U taligen-*.pkg*
 ```
 
-== To run on Arch Linux or UBOS ==
+# To run on Arch Linux or UBOS
 ```
 taligen <tl-file>
 ```
