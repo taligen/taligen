@@ -1,12 +1,13 @@
 #! /usr/bin/env python
 # -*- coding: UTF-8 -*-
+#
+
 import argparse
 import re
 import datetime
 import json
 import os
 from collections import deque
-
 
 
 def add_original_description(step, section, description):
@@ -20,6 +21,7 @@ def add_original_description(step, section, description):
         ss["description"] = d
         step[section] = ss
     return step
+
 
 def add_comment(script, step, section, comment):
     if section == "":
@@ -50,6 +52,7 @@ def arglist_to_paramdict(arglist):
             paramdict[splitlist[0].strip()] = splitlist[1].strip()
     return paramdict
 
+
 def params_to_string(substitutions):
     paramstring = ""
     for substitution in substitutions:
@@ -65,10 +68,10 @@ def read_through_file(filename, script, parsed_scripts, filestack):
         return parsed_scripts[filename]
 
     if filename in filestack:
-        print("recursion cycle: " 
+        print("recursion cycle: "
             + filename + " called when already in the stack: "
             + str(filestack))
-        return ["recursion cycle: " 
+        return ["recursion cycle: "
             + filename + " called when already in the stack: "
             + str(filestack)]
 
@@ -113,7 +116,7 @@ def read_through_file(filename, script, parsed_scripts, filestack):
                 filestack.append(filename)
                 if os.path.dirname(filename) != '':
                     call_file = os.path.dirname(filename) + "/" + call_file
-                step["steps"] = read_through_file(call_file, step, 
+                step["steps"] = read_through_file(call_file, step,
                         parsed_scripts, filestack)
                 filestack.pop()
                 steps = add_step(steps, step, section)
@@ -170,7 +173,7 @@ def main():
     script = collect_pass(args)
     script["filename"] = json_filename
     script = replace_pass(script, {})
-    
+
     with open(json_filename, 'w') as fp:
         json.dump(script, fp, indent=4)
 
