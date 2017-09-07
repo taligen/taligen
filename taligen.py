@@ -227,6 +227,7 @@ def parse_arguments():
     argparser = argparse.ArgumentParser(description="taligen: generate json file from tl file")
     argparser.add_argument("tl_file", type=str, help=".tl (task list) file to generate from")
     argparser.add_argument("parameters", type=str, nargs="*", help="parameters to substitute for variables in the .tl files")
+    argparser.add_argument("-o", "--output", type=str, help="output filename (optional)")
     return argparser.parse_args()
 
 
@@ -269,8 +270,11 @@ def replace_pass(script, parameters, filestack):
 def main():
     args = parse_arguments()
 
-    dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    json_filename = dt+"."+os.path.splitext(args.tl_file)[0]+params_to_string(args.parameters)+'.json'
+    if (args.output):
+        json_filename = args.output
+    else:
+        dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        json_filename = dt+"."+os.path.splitext(args.tl_file)[0]+params_to_string(args.parameters)+'.json'
 
     script = collect_pass(args)
     script["filename"] = json_filename
@@ -278,6 +282,7 @@ def main():
 
     with open(json_filename, 'w') as fp:
         json.dump(script, fp, indent=4)
+    print("Generated " + json_filename + " from " + args.tl_file)
 
 
 main()
