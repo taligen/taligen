@@ -233,7 +233,7 @@ def parse_arguments():
 
 def collect_pass(args):
     script = {"name": args.tl_file}
-    script["generated"] = str(datetime.datetime.now())
+    script["generated"] = datetime.datetime.now().strftime('%Y/%m/%d %H-%M-%S')
     script["parameters"] = arglist_to_paramdict(args.parameters)
     script["steps"] = read_through_file(".", args.tl_file, script["parameters"], {}, deque())
     return script
@@ -274,7 +274,7 @@ def main():
         json_filename = args.output
     else:
         dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        json_filename = dt+"."+os.path.splitext(args.tl_file)[0]+params_to_string(args.parameters)+'.json'
+        json_filename = dt+"."+os.path.splitext(os.path.basename(args.tl_file))[0]+params_to_string(args.parameters)+'.json'
 
     script = collect_pass(args)
     script["filename"] = json_filename
