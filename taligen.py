@@ -8,6 +8,7 @@ import datetime
 import json
 import os
 import sys
+import copy
 from collections import deque
 
 
@@ -145,7 +146,7 @@ def read_through_file(path, filename, parameters, parsed_scripts, filestack):
 
     if pfilename in parsed_scripts:
         # print("found already parsed " + pfilename)
-        return parsed_scripts[pfilename]
+        return copy.deepcopy(parsed_scripts[pfilename])
 
     # print("parmeterized filename is " + pfilename)
     lines = get_file_lines(pfilename, parsed_scripts, filestack)
@@ -240,9 +241,11 @@ def collect_pass(args):
 
 
 def replace_within_description(step, part, parameters, filestack):
+    print("... replace_within_description: " + part + " " + str(filestack))
     if isinstance(step, dict) and part in step and len(parameters) > 0:
-        # for key, value in parameters.iteritems():
+        print("...... description: " + step[part]["description"])
         for key, value in parameters.items():
+            print("...... $" + key + " -> " + value)
             step[part]["description"] = re.sub("\\$"+key, value, step[part]["description"])
         set_vars = re.findall(r"\$\w+", step[part]["description"])
         for var in set_vars:
@@ -254,8 +257,11 @@ def replace_within_description(step, part, parameters, filestack):
 
 
 def replace_pass(script, parameters, filestack):
+    print("replace pass: filename: "+ script["filename"] + ", context parameters: " + str(parameters) + ", script parameters: " + str(script["parameters"]))
     myparameters = parameters.copy()
+    print("... myparameters: " + str(myparameters))
     myparameters.update(script["parameters"])
+    print("...... myparameters: " + str(myparameters))
     if len(myparameters) > 0:
         for step in script["steps"]:
             step = replace_within_description(step, "a", myparameters, filestack)
