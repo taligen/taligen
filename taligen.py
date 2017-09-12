@@ -215,7 +215,8 @@ def read_through_file(path, filename, parameters, parsed_scripts, filestack):
                 filestack.append(pfilename)
                 # print("... setting step filename ")
                 step["filename"] = find_parameterized_file(path, call_file, call_parameters, filestack)
-                step["parameters"] = arglist_to_paramdict(call_file_match.group(2))
+                # step["parameters"] = arglist_to_paramdict(call_file_match.group(2))
+                step["parameters"] = call_parameters
                 # print("call step added " + pfilename + " to " + str(filestack))
                 step["steps"] = read_through_file(path, call_file, call_parameters, 
                         parsed_scripts, filestack)
