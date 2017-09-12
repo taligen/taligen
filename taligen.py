@@ -204,7 +204,14 @@ def read_through_file(path, filename, parameters, parsed_scripts, filestack):
                 call_file_match = re.match("(.+)\((.*)\)\s*", linematch.group(2))
                 call_file = call_file_match.group(1) + ".tl"
                 step["name"] = call_file
-                call_parameters = {**parameters, **arglist_to_paramdict(call_file_match.group(2))}
+                call_parameters = parameters.copy()
+                # print("  call_parameters1: " + str(call_parameters))
+                # print("  call file match 1: " + str(call_file_match.group(1)))
+                # print("  call file match 2: " + str(call_file_match.group(2)))
+                # print("  call file params: " + str(arglist_to_paramdict(call_file_match.group(2))))
+                call_parameters.update(arglist_to_paramdict(call_file_match.group(2)))
+                # print("  call_parameters2: " + str(call_parameters))
+                # call_parameters = {**parameters, **arglist_to_paramdict(call_file_match.group(2))}
                 filestack.append(pfilename)
                 # print("... setting step filename ")
                 step["filename"] = find_parameterized_file(path, call_file, call_parameters, filestack)
@@ -241,11 +248,11 @@ def collect_pass(args):
 
 
 def replace_within_description(step, part, parameters, filestack):
-    print("... replace_within_description: " + part + " " + str(filestack))
+    # print("... replace_within_description: " + part + " " + str(filestack))
     if isinstance(step, dict) and part in step and len(parameters) > 0:
-        print("...... description: " + step[part]["description"])
+        # print("...... description: " + step[part]["description"])
         for key, value in parameters.items():
-            print("...... $" + key + " -> " + value)
+            # print("...... $" + key + " -> " + value)
             step[part]["description"] = re.sub("\\$"+key, value, step[part]["description"])
         set_vars = re.findall(r"\$\w+", step[part]["description"])
         for var in set_vars:
@@ -257,19 +264,19 @@ def replace_within_description(step, part, parameters, filestack):
 
 
 def replace_pass(script, parameters, filestack):
-    print("replace pass: filename: "+ script["filename"] + ", context parameters: " + str(parameters) + ", script parameters: " + str(script["parameters"]))
+    # print("replace pass: filename: "+ script["filename"] + ", context parameters: " + str(parameters) + ", script parameters: " + str(script["parameters"]))
     myparameters = parameters.copy()
-    print("... myparameters: " + str(myparameters))
+    # print("... myparameters: " + str(myparameters))
     myparameters.update(script["parameters"])
-    print("...... myparameters: " + str(myparameters))
-    if len(myparameters) > 0:
-        for step in script["steps"]:
-            step = replace_within_description(step, "a", myparameters, filestack)
-            step = replace_within_description(step, "o", myparameters, filestack)
-            if "steps" in step:
-                filestack.append(step["filename"]+"("+str(step["parameters"])+")")
-                step = replace_pass(step, myparameters, filestack)
-                filestack.pop()
+    # print("...... myparameters: " + str(myparameters))
+
+    for step in script["steps"]:
+        step = replace_within_description(step, "a", myparameters, filestack)
+        step = replace_within_description(step, "o", myparameters, filestack)
+        if "steps" in step:
+            filestack.append(step["filename"]+"("+str(step["parameters"])+")")
+            step = replace_pass(step, myparameters, filestack)
+            filestack.pop()
     return script
 
 
