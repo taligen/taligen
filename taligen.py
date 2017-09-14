@@ -237,6 +237,7 @@ def parse_arguments():
     argparser.add_argument("tl_file", type=str, help=".tl (task list) file to generate from")
     argparser.add_argument("parameters", type=str, nargs="*", help="parameters to substitute for variables in the .tl files")
     argparser.add_argument("-o", "--output", type=str, help="output filename (optional)")
+    argparser.add_argument("-O", "--output-directory", type=str, dest='outputDir', help="output directory (optional)")
     return argparser.parse_args()
 
 
@@ -284,8 +285,16 @@ def replace_pass(script, parameters, filestack):
 def main():
     args = parse_arguments()
 
+    tl_file = args.tl_file;
     if (args.output):
         json_filename = args.output
+    elif (args.outputDir):
+        json_filename = re.sub('.tl$', '', tl_file) # if it ends in .tl, strip
+        json_filename = re.sub('^.*/', '', json_filename) # strip directory
+        if (args.outputDir.endswith('/')):
+            json_filename = args.outputDir + json_filename + '.json'
+        else:
+            json_filename = args.outputDir + '/' + json_filename + '.json'
     else:
         dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         json_filename = dt+"."+os.path.splitext(os.path.basename(args.tl_file))[0]+params_to_string(args.parameters)+'.json'
