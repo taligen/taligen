@@ -247,7 +247,7 @@ def parse_arguments():
 
 def collect_pass(args):
     script = {"name": args.tl_file}
-    script["generated"] = datetime.datetime.now().strftime('%Y/%m/%d %H-%M-%S')
+    script["generated"] = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
     script["parameters"] = arglist_to_paramdict(args.parameters)
     script["steps"] = read_through_file(".", args.tl_file, script["parameters"], {}, deque())
     return script
