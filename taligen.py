@@ -65,9 +65,13 @@ def arglist_to_paramdict(arglist):
         return arglist_to_paramdict(arglist.split(","))
     paramdict = {}
     for arg in arglist:
-        if arg.strip() != '':
+        arg = arg.strip()
+        if arg != '':
             splitlist = arg.split("=")
-            paramdict[splitlist[0].strip()] = splitlist[1].strip()
+            if len(splitlist) >=2:
+                paramdict[splitlist[0].strip()] = splitlist[1].strip()
+            else:
+                exit( "Error: cannot split "+arg+" into name=value")
     return paramdict
 
 
