@@ -173,16 +173,17 @@ def read_through_file(path, filename, parameters, parsed_scripts, filestack):
             last_section = section
             linematch = re.match("([A-Za-z]+):\s*(.*)", line)
             if linematch:
+                steps = add_step(steps, step, last_section)
+
+                if last_section != "" or "comment" in step:
+                    step_num += 1
+                    step = {"id": str(step_num), "order": step_num}
+
                 section = linematch.group(1).lower()
                 description = linematch.group(2)
             else:
                 description = line
             if linematch and section == "set":
-                steps = add_step(steps, step, last_section)
-                
-                if last_section != "" or "comment" in step:
-                    step_num += 1
-                    step = {"id": str(step_num), "order": step_num}
                 section = ""
                 
                 set_param_match = re.match("\s*(.+)\s*=\s*(.+)\s*", linematch.group(2))
@@ -197,12 +198,8 @@ def read_through_file(path, filename, parameters, parsed_scripts, filestack):
                 step_num += 1
                 step = {"id": str(step_num), "order": step_num}                
             elif linematch and section == "call":
-                steps = add_step(steps, step, last_section)
-
-                if last_section != "" or "comment" in step:
-                    step_num += 1
-                    step = {"id": str(step_num), "order": step_num}
                 section = ""
+                
                 step["call"] = linematch.group(2)
                 # print("call found  " + step["call"])
                 call_file_match = re.match("(.+)\((.*)\)\s*", linematch.group(2))
