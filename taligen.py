@@ -203,6 +203,8 @@ def read_through_file(path, filename, parameters, parsed_scripts, filestack):
                 step["call"] = linematch.group(2)
                 # print("call found  " + step["call"])
                 call_file_match = re.match("(.+)\((.*)\)\s*", linematch.group(2))
+                if not call_file_match:
+                    exit("Error: Incorrect call syntax in step " + step["id"] + " '" + line + "' call stack is " + str(filestack))
                 call_file = call_file_match.group(1) + ".tl"
                 step["name"] = call_file
                 call_parameters = parameters.copy()
