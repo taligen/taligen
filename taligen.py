@@ -259,8 +259,8 @@ def replace_within_description(step, part, parameters, filestack):
         # print("...... description: " + step[part]["description"])
         for key, value in parameters.items():
             # print("...... $" + key + " -> " + value)
-            step[part]["description"] = re.sub("\\$"+key, value, step[part]["description"])
-        set_vars = re.findall(r"\$\w+", step[part]["description"])
+            step[part]["description"] = re.sub("(?<=[^\\\])\\$"+key, value, step[part]["description"])
+        set_vars = re.findall(r"(?<=[^\\])\$\w+", step[part]["description"])
         for var in set_vars:
             # print("Missing " + var[1:] + " for " + step[part]["description"])
             # step["comment"] = step.get("comment", "") + "\nMissing " + var[1:] + " for " + step[part]["description"]
