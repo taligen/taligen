@@ -10,6 +10,7 @@ import os
 import sys
 import copy
 from collections import deque
+import urllib.parse
 
 
 def add_original_description(step, section, description):
