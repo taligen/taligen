@@ -10,6 +10,7 @@ import os
 import sys
 import copy
 from collections import deque
+import urllib.parse
 
 
 def add_original_description(step, section, description):
@@ -173,16 +174,17 @@ def read_through_file(path, filename, parameters, parsed_scripts, filestack):
             last_section = section
             linematch = re.match("([A-Za-z]+):\s*(.*)", line)
             if linematch:
+                steps = add_step(steps, step, last_section)
+
+                if last_section != "" or "comment" in step:
+                    step_num += 1
+                    step = {"id": str(step_num), "order": step_num}
+
                 section = linematch.group(1).lower()
                 description = linematch.group(2)
             else:
                 description = line
             if linematch and section == "set":
-                steps = add_step(steps, step, last_section)
-                
-                if last_section != "" or "comment" in step:
-                    step_num += 1
-                    step = {"id": str(step_num), "order": step_num}
                 section = ""
                 
                 set_param_match = re.match("\s*(.+)\s*=\s*(.+)\s*", linematch.group(2))
@@ -197,15 +199,13 @@ def read_through_file(path, filename, parameters, parsed_scripts, filestack):
                 step_num += 1
                 step = {"id": str(step_num), "order": step_num}                
             elif linematch and section == "call":
-                steps = add_step(steps, step, last_section)
-
-                if last_section != "" or "comment" in step:
-                    step_num += 1
-                    step = {"id": str(step_num), "order": step_num}
                 section = ""
+                
                 step["call"] = linematch.group(2)
                 # print("call found  " + step["call"])
                 call_file_match = re.match("(.+)\((.*)\)\s*", linematch.group(2))
+                if not call_file_match:
+                    exit("Error: Incorrect call syntax in step " + step["id"] + " '" + line + "' call stack is " + str(filestack))
                 call_file = call_file_match.group(1) + ".tl"
                 step["name"] = call_file
                 call_parameters = parameters.copy()
@@ -259,8 +259,8 @@ def replace_within_description(step, part, parameters, filestack):
         # print("...... description: " + step[part]["description"])
         for key, value in parameters.items():
             # print("...... $" + key + " -> " + value)
-            step[part]["description"] = re.sub("\\$"+key, value, step[part]["description"])
-        set_vars = re.findall(r"\$\w+", step[part]["description"])
+            step[part]["description"] = re.sub("(?<=[^\\\])\\$"+key, value, step[part]["description"])
+        set_vars = re.findall(r"(?<=[^\\])\$\w+", step[part]["description"])
         for var in set_vars:
             # print("Missing " + var[1:] + " for " + step[part]["description"])
             # step["comment"] = step.get("comment", "") + "\nMissing " + var[1:] + " for " + step[part]["description"]
