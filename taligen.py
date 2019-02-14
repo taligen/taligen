@@ -29,19 +29,6 @@ def add_original_description(step, section, description):
     return step
 
 
-def add_comment(step, section, comment):
-    if section == "":
-        c = step.get("comment", "")
-        step["comment"] = c + comment
-    else:
-        ss = step.get(section, {})
-        c = ss.get("comment", "")
-        c += comment
-        ss["comment"] = c
-        step[section] = ss
-    return step
-
-
 def add_error(step, section, error):
     if section == "":
         c = step.get("error", "")
@@ -68,7 +55,7 @@ def arglist_to_paramdict(arglist):
     for arg in arglist:
         arg = arg.strip()
         if arg != '':
-            splitlist = arg.split("=")
+            splitlist = arg.split("=", 1)
             if len(splitlist) >=2:
                 paramdict[splitlist[0].strip()] = splitlist[1].strip()
             else:
@@ -113,7 +100,7 @@ def find_parameterized_file(path, filename, parameters, filestack):
     # print ("choices are: " + str(f))
     if len(f) == 0:
         exit("Error:  File "+filename+" not found.  Callstack is: "+ str(filestack) + " Paramaters are: "+ str(parameters))
-        
+
     maxargs = -1
     chosenfile = ""
     for name in f:
@@ -146,7 +133,7 @@ def read_through_file(path, filename, parameters, parsed_scripts, filestack):
     if os.path.split(filename)[0] != "":
         path = path + "/" + os.path.split(filename)[0]
         filename = os.path.split(filename)[1]
-    
+
     pfilename = find_parameterized_file(path, filename, parameters, filestack)
 
     if pfilename in parsed_scripts:
@@ -162,9 +149,8 @@ def read_through_file(path, filename, parameters, parsed_scripts, filestack):
 
     section = ""
     for line in lines:
-        if line[0] == '#':
-            add_comment(step, section, line)
-        elif line.strip() == '':
+        line = re.sub( '#.*', '', line ) # strip comments
+        if line.strip() == '':
             steps = add_step(steps, step, section)
             if section != "" or "comment" in step:
                 step_num += 1
@@ -186,7 +172,7 @@ def read_through_file(path, filename, parameters, parsed_scripts, filestack):
                 description = line
             if linematch and section == "set":
                 section = ""
-                
+
                 set_param_match = re.match("\s*(.+)\s*=\s*(.+)\s*", linematch.group(2))
                 parameter = set_param_match.group(1)
                 value = set_param_match.group(2)
@@ -195,12 +181,12 @@ def read_through_file(path, filename, parameters, parsed_scripts, filestack):
                     parameters[parameter] = value
                     # print ("added parameter: " + parameter + ", value: " + value)
                 steps = add_step(steps, step, section)
-                
+
                 step_num += 1
-                step = {"id": str(step_num), "order": step_num}                
+                step = {"id": str(step_num), "order": step_num}
             elif linematch and section == "call":
                 section = ""
-                
+
                 step["call"] = linematch.group(2)
                 # print("call found  " + step["call"])
                 call_file_match = re.match("(.+)\((.*)\)\s*", linematch.group(2))
@@ -222,7 +208,7 @@ def read_through_file(path, filename, parameters, parsed_scripts, filestack):
                 # step["parameters"] = arglist_to_paramdict(call_file_match.group(2))
                 step["parameters"] = call_parameters
                 # print("call step added " + pfilename + " to " + str(filestack))
-                step["steps"] = read_through_file(path, call_file, call_parameters, 
+                step["steps"] = read_through_file(path, call_file, call_parameters,
                         parsed_scripts, filestack)
                 filestack.pop()
                 steps = add_step(steps, step, section)
@@ -237,19 +223,19 @@ def read_through_file(path, filename, parameters, parsed_scripts, filestack):
 
 
 def parse_arguments():
-    argparser = argparse.ArgumentParser(description="taligen: generate json file from tl file")
-    argparser.add_argument("tl_file", type=str, help=".tl (task list) file to generate from")
-    argparser.add_argument("parameters", type=str, nargs="*", help="parameters to substitute for variables in the .tl files")
+    argparser = argparse.ArgumentParser(description="taligen: generate json file from tlt file")
+    argparser.add_argument("tlt_file", type=str, help=".tlt (task list template) file to generate from")
+    argparser.add_argument("parameters", type=str, nargs="*", help="parameters to substitute for variables in the .tlt files")
     argparser.add_argument("-o", "--output", type=str, help="output filename (optional)")
     argparser.add_argument("-O", "--output-directory", type=str, dest='outputDir', help="output directory (optional)")
     return argparser.parse_args()
 
 
 def collect_pass(args):
-    script = {"name": args.tl_file}
+    script = {"name": args.tlt_file}
     script["generated"] = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
     script["parameters"] = arglist_to_paramdict(args.parameters)
-    script["steps"] = read_through_file(".", args.tl_file, script["parameters"], {}, deque())
+    script["steps"] = read_through_file(".", args.tlt_file, script["parameters"], {}, deque())
     return script
 
 
@@ -289,11 +275,11 @@ def replace_pass(script, parameters, filestack):
 def main():
     args = parse_arguments()
 
-    tl_file = args.tl_file;
+    tlt_file = args.tlt_file;
     if (args.output):
         json_filename = args.output
     elif (args.outputDir):
-        json_filename = re.sub('.tl$', '', tl_file) # if it ends in .tl, strip
+        json_filename = re.sub('.tlt$', '', tlt_file) # if it ends in .tlt, strip
         json_filename = re.sub('^.*/', '', json_filename) # strip directory
         if (args.outputDir.endswith('/')):
             json_filename = args.outputDir + json_filename + '.json'
@@ -305,11 +291,12 @@ def main():
 
     script = collect_pass(args)
     script["filename"] = json_filename
-    script = replace_pass(script, {}, [args.tl_file+"("+str(args.parameters)+")"])
+    script = replace_pass(script, {}, [args.tlt_file+"("+str(args.parameters)+")"])
 
     with open(json_filename, 'w') as fp:
         json.dump(script, fp, indent=4)
-    print("Generated " + json_filename + " from " + args.tl_file)
+    print("Generated " + json_filename + " from " + args.tlt_file)
 
 
-main()
+if __name__ == "__main__":
+    main()
