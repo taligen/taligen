@@ -19,6 +19,9 @@ class TaskListTemplateItem:
         self.tlt_file    = tlt_file
         self.line_number = line_number
 
+    def get_source( self ):
+        return ( self.tlt_file, self.line_number )
+
     @abc.abstractmethod
     def process( self, parameters, items, parser ):
         """

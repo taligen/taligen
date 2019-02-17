@@ -21,10 +21,11 @@ class TaskList:
         self.parameters  = parameters
         self.template    = template
 
-    def as_json( self ):
-        ret = {
-            'template'   : self.template.get_source(),
-            'parameters' : self.parameters.as_dict(),
-            'steps'      : list( map( lambda s: s.as_json(), self.steps ))
-        }
-        return ret
+    def get_steps( self ):
+        return self.steps
+
+    def step_id( self, parent_id, local_child_id ):
+        """
+        Consistent creation of hierarchical ids
+        """
+        return parent_id + '.' + str( local_child_id )

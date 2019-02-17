@@ -52,7 +52,7 @@ def run():
         else:
             json_filename = args.outputDir + '/' + json_filename
     else:
-        json_filename = dt+"."+os.path.splitext(os.path.basename(args.tlt_file))[0]+parameters.to_string()+'.json'
+        json_filename = None
 
     parser = TaskListTemplateParser()
 
@@ -60,11 +60,22 @@ def run():
         tlt = parser.obtain_with_parameters( args.tlt_file, parameters )
         tl = tlt.instantiate( parameters, parser )
 
-        json_content = tl.as_json()
+        json_content = {
+            'template'   : tl.template.get_source(),
+            'parameters' : tl.parameters.as_dict(),
+            'steps'      : []
+        }
+        index = 0
+        for step in tl.get_steps():
+            index += 1
+            step.add_as_json( json_content['steps'], str(index) )
 
-        with open(json_filename, 'w') as fp:
-           json.dump( json_content, fp, indent=2)
-        print("Generated " + json_filename)
+        if json_filename:
+            with open(json_filename, 'w') as fp:
+               json.dump( json_content, fp, indent=2)
+            print("Generated " + json_filename)
+        else:
+            print( json.dumps( json_content, indent=2 ))
 
     except SubstitutionException as e:
         exit( 'FATAL: ' + str( e ))

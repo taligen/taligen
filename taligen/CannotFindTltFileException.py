@@ -21,7 +21,7 @@ class CannotFindTltFileException(BaseException):
     def __str__( self ):
         ret =  'Cannot find tlt file ' + self.tlt
         if not self.parameters.is_empty():
-            ret += ' with parameters ' + self.parameters.to_string()
+            ret += ' with parameters ' + str( self.parameters )
         if self.source:
             ret += ' in file ' + self.source + ', line ' + str(self.line)
 

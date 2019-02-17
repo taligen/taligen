@@ -15,10 +15,10 @@ class TaskListCheckboxItem(TaskListItem):
 
         self.content = content
 
-    def as_json(self):
-        return {
-            'type'    : self.template.tag,
-            'content' : self.content
-        }
-
-
+    def add_as_json( self, json_steps, step_id ):
+        json_steps.append(
+                self.with_context( {
+                    'type'        : self.template.tag,
+                    'content'     : self.content
+                },
+                step_id ))

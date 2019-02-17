@@ -19,7 +19,9 @@ class SubTaskListItem(TaskListItem):
 
         self.tl = tl
 
-    def as_json(self):
-        ret = self.tl.as_json()
-        ret['type'] = 'call'
-        return ret
+    def add_as_json( self, json_steps, step_id = '' ):
+        index = 0
+        for sub_step in self.tl.get_steps():
+            index += 1
+            sub_step.add_as_json( json_steps, self.tl.step_id( step_id, index ))
+
