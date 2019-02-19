@@ -24,6 +24,15 @@ class TaskList:
     def get_steps( self ):
         return self.steps
 
+    def get_name( self ):
+        """
+        Its name is the name of the first item.
+        """
+        if len( self.steps ) > 0:
+            return self.steps[0].get_name()
+        else:
+            return None
+
     def step_id( self, parent_id, local_child_id ):
         """
         Consistent creation of hierarchical ids

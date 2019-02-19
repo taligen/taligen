@@ -10,6 +10,7 @@ import argparse
 import datetime
 import json
 import os
+import re
 import sys
 from taligen.TaskListParameters import TaskListParameters
 from taligen.TaskListTemplateParser import TaskListTemplateParser
@@ -46,7 +47,10 @@ def run():
     elif args.outputDir:
         json_filename = re.sub('.tlt$', '', tlt_file) # if it ends in .tlt, strip
         json_filename = re.sub('^.*/', '', json_filename) # strip directory
-        json_filename = json_filename + '.json'
+
+        if not parameters.is_empty() :
+            json_filename += '.' + str(parameters)
+        json_filename += '.tl-json'
         if (args.outputDir.endswith('/')):
             json_filename = args.outputDir + json_filename
         else:
@@ -58,12 +62,18 @@ def run():
 
     try:
         tlt = parser.obtain_with_parameters( args.tlt_file, parameters )
-        tl = tlt.instantiate( parameters, parser )
+        tl  = tlt.instantiate( parameters, parser )
+
+        if tl.get_name():
+            tlName = tl.get_name()
+        else:
+            tlName = os.path.basename( json_filename )
 
         json_content = {
             'template'   : tl.template.get_source(),
             'parameters' : tl.parameters.as_dict(),
-            'steps'      : []
+            'steps'      : [],
+            'name'       : tlName
         }
         index = 0
         for step in tl.get_steps():
@@ -73,7 +83,8 @@ def run():
         if json_filename:
             with open(json_filename, 'w') as fp:
                json.dump( json_content, fp, indent=2)
-            print("Generated " + json_filename)
+
+            print( 'Generated Task List "' + tlName + '" at ' + json_filename )
         else:
             print( json.dumps( json_content, indent=2 ))
 

@@ -8,9 +8,9 @@ class Task:
     """
     Abstract superclass of all items in a Task List
     """
-    def __init__(self, task_template):
+    def __init__(self, template):
         """
-        task_template: reference to the instance of (the subclass of)
-             TaskTemplate that this is an instance of
+        template: reference to the instance of (the subclass of)
+             TaskListTemplateItem that this is an instance of
         """
-        self.template = task_template
+        self.template = template

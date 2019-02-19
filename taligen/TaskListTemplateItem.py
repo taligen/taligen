@@ -7,23 +7,21 @@
 import abc
 
 class TaskListTemplateItem:
-    def __init__( self, tag, tlt_file, line_number ):
+    def __init__( self, tag, tlt_loc ):
         """
         Abstract superclass of all items that can be on a Task List Template
         tag: the tag of the item, such as "a" or "call"
         content: the actual invocation
-        tlt_file: the file in which this item was found
-        line_number: the line number at which this item was found
+        tlt_loc: the location in the source where the item was foudn
         """
-        self.tag         = tag
-        self.tlt_file    = tlt_file
-        self.line_number = line_number
+        self.tag     = tag.lower() # normalize
+        self.tlt_loc = tlt_loc
 
-    def get_source( self ):
-        return ( self.tlt_file, self.line_number )
+    def get_location( self ):
+        return ( self.tlt_loc )
 
     @abc.abstractmethod
-    def process( self, parameters, items, parser ):
+    def process( self, parameters, items, parser, parentLocationStack ):
         """
         Do whatever necessary to process this item with respect to
         the provided sequence of previously processed TaskListItems

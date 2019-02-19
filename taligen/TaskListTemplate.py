@@ -21,7 +21,7 @@ class TaskListTemplate:
     def get_source( self ):
         return self.source
 
-    def instantiate( self, parameters, parser ):
+    def instantiate( self, parameters, parser, parentLocationStack = None ):
         """
         Instantiate this Task List Template into a Task List,
         using the provided parameters. The parser is passed-on to
@@ -31,6 +31,6 @@ class TaskListTemplate:
         localParameters = parameters.clone()
 
         for item in self.items:
-            item.process( localParameters, steps, parser )
+            item.process( localParameters, steps, parser, parentLocationStack )
 
         return TaskList( steps, parameters, self );

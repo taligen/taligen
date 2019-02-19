@@ -6,14 +6,16 @@
 
 import re
 import os.path
+from taligen.CannotFindTltFileException import CannotFindTltFileException
+from taligen.SourceLocation import SourceLocation
+from taligen.SubstitutionException import SubstitutionException
+from taligen.SyntaxException import SyntaxException
 from taligen.TaskListTemplate import TaskListTemplate
 from taligen.TaskListTemplateCallItem import TaskListTemplateCallItem
 from taligen.TaskListTemplateCheckboxItem import TaskListTemplateCheckboxItem
+from taligen.TaskListTemplateErrorItem import TaskListTemplateErrorItem
 from taligen.TaskListTemplateHeaderItem import TaskListTemplateHeaderItem
 from taligen.TaskListTemplateSetItem import TaskListTemplateSetItem
-from taligen.SubstitutionException import SubstitutionException
-from taligen.SyntaxException import SyntaxException
-from taligen.CannotFindTltFileException import CannotFindTltFileException
 
 class TaskListTemplateParser:
     """
@@ -118,9 +120,9 @@ class TaskListTemplateParser:
         if not os.path.isfile( tlt_file ):
             raise ValueError( 'File does not exist: ' + tlt_file )
 
-        file  = open( tlt_file, "r")
-        lines = file.readlines() # may throw exception
-        file.close()
+        f  = open( tlt_file, "r")
+        lines = f.readlines() # may throw exception
+        f.close()
 
         # consolidate lines and parse them
         current      = None # build up consolidated line here
@@ -142,17 +144,20 @@ class TaskListTemplateParser:
 
             tag     = tag.lower()
             content = content.strip()
+            tlt_loc = SourceLocation( tlt_file, line_count )
 
             if content is None:
                 syntaxError( 'No tag present' )
             elif tag in [ 'a', 'o' ]:
-                items.append( TaskListTemplateCheckboxItem( tag, content, tlt_file, line_count ))
+                items.append( TaskListTemplateCheckboxItem( tag, content, tlt_loc ))
             elif tag == 'h':
-                items.append( TaskListTemplateHeaderItem( tag, content, tlt_file, line_count ))
+                items.append( TaskListTemplateHeaderItem( tag, content, tlt_loc ))
             elif tag == 'set':
-                items.append( TaskListTemplateSetItem( tag, content, tlt_file, line_count ))
+                items.append( TaskListTemplateSetItem( tag, content, tlt_loc ))
             elif tag == 'call':
-                items.append( TaskListTemplateCallItem( tag, content, tlt_file, line_count ))
+                items.append( TaskListTemplateCallItem( tag, content, tlt_loc ))
+            elif tag == 'error':
+                items.append( TaskListTemplateErrorItem( tag, content, tlt_loc ))
             else:
                 syntaxError( 'Unknown tag ' + tag )
 

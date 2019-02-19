@@ -87,10 +87,14 @@ rest of the `.tlt` file (and any `.tlt` files "called"` from it)
 
 ## Invocation
 
-`taligen <file.tlt> <key=value> ... [ -o <out.json> | -O <outdir> ]`
+`taligen <file.tlt> <key=value> ... [ -o <out.tl-json> | -O <outdir> ]`
 
 This processes `<file.tlt>` and, recursively, all files "called" from it,
 with the provided parameters given as `key=value`. Those may not be needed;
 taligen will tell you. You can either generate a named JSON output file,
 or get an auto-generated filename (that has the timestamp in it) in
 a named directory (or, by default, the current directory).
+
+By convention, we use extension `.tl-json` to indicate a JSON file that
+contains a Taligen task list.
+

@@ -4,19 +4,20 @@
 # All rights reserved. License: see package.
 #
 
-from taligen.TaskListCheckboxItem import TaskListCheckboxItem
-from taligen.TaskListTemplateItem import TaskListTemplateItem
+from taligen.SourceLocationStack import SourceLocationStack
 from taligen.SubstitutionException import SubstitutionException
+from taligen.TaskListTemplateItem import TaskListTemplateItem
 
-class TaskListTemplateCheckboxItem(TaskListTemplateItem) :
+class TaskListTemplateErrorItem(TaskListTemplateItem):
     """
-    An item in a TaskListTemplate that, when instantiated, should
-    be rendered with a checkbox
+    An item in a TaskListTemplate that, when instantiated, causes
+    and error and aborts processing
     """
     def __init__( self, tag, content, tlt_loc ):
         super().__init__( tag, tlt_loc )
 
         self.content = content
+
 
     def process( self, parameters, items, parser, parentLocationStack ):
         try:
@@ -25,4 +26,8 @@ class TaskListTemplateCheckboxItem(TaskListTemplateItem) :
         except KeyError as e:
             raise SubstitutionException( self.content, e.args[0], parameters, SourceLocationStack( self.tlt_loc, parameters, parentLocationStack ))
 
-        items.append( TaskListCheckboxItem( inst_content, self ))
+        raise ValueError(
+                'Aborting due to error statement at '
+                + self.tlt_loc
+                + ': '
+                + inst_content )

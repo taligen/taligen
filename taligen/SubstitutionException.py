@@ -4,21 +4,23 @@
 # All rights reserved. License: see package.
 #
 
+from taligen.SourceLocation import SourceLocation
+
 class SubstitutionException(BaseException):
     """
     Thrown when a variable substitution could not be made
     """
-    def __init__( self, content, var, parameters, source, line ) :
+    def __init__( self, content, var, parameters, locationStack ) :
         """
         The content contains the variables, var was not found, parameters
-        are the available parameters, and the problem occurred at tlt
-        file source, line line.
+        are the available parameters, and loc where the problem occurred
         """
-        self.content    = content
-        self.var        = var
-        self.parameters = parameters
-        self.source     = source
-        self.line       = line
+        self.content       = content
+        self.var           = var
+        self.parameters    = parameters
+        self.locationStack = locationStack
 
     def __str__( self ):
-        return 'Could not substitute "' + self.var + '" in file ' + self.source + ', line ' + str(self.line)
+        ret = 'Could not substitute "' + self.var + '"' + " at:\n"
+        ret += str( self.locationStack )
+        return ret

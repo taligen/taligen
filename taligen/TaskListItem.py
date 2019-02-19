@@ -18,6 +18,13 @@ class TaskListItem:
         """
         self.template = template
 
+    def get_name( self ):
+        """
+        By default, TaskListItems do not have names, except that
+        TaskLidHeaderItem does.
+        """
+        return None
+
     @abc.abstractmethod
     def add_as_json( self, json_steps, step_id ):
         pass
@@ -27,10 +34,10 @@ class TaskListItem:
         Simplifies consistently adding the source information into
         the JSON by subclasses
         """
-        ( source_file, source_line ) = self.template.get_source()
+        loc = self.template.get_location()
 
-        json_content['source_file'] = source_file
-        json_content['source_line'] = source_line
+        json_content['source_file'] = loc.filename
+        json_content['source_line'] = loc.line
         json_content['id']          = step_id
 
         return json_content

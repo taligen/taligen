@@ -15,6 +15,9 @@ class TaskListHeaderItem(TaskListItem):
 
         self.content = content
 
+    def get_name( self ):
+        return self.content
+
     def add_as_json( self, json_steps, step_id ):
         json_steps.append(
                 self.with_context( {
