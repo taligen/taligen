@@ -6,6 +6,7 @@
 
 from taligen.TaskListCheckboxItem import TaskListCheckboxItem
 from taligen.TaskListTemplateItem import TaskListTemplateItem
+from taligen.SourceLocationStack import SourceLocationStack
 from taligen.SubstitutionException import SubstitutionException
 
 class TaskListTemplateCheckboxItem(TaskListTemplateItem) :

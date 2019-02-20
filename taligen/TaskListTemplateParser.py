@@ -86,13 +86,9 @@ class TaskListTemplateParser:
             else:
                 return -c.count( '.', lastSlash + 1 ) * 2 + 1
 
-        print( "XXX Looking for " + tlt_file )
-
         sortedCandidates = sorted( candidates, key=candidateQuality )
 
         for candidate in sortedCandidates:
-
-            print( "    Candidate " + candidate )
 
             # The first one that matches parameters is the best match
             lastSlash = candidate.rfind( '/' )
@@ -179,7 +175,7 @@ class TaskListTemplateParser:
             """
             Helper method to raise a syntax error
             """
-            raise SyntaxException( msg, tlt_file, line_count )
+            raise SyntaxException( msg, SourceLocation( tlt_file, line_count ))
 
         def parseConsolidatedLine( line ):
             """

@@ -28,6 +28,6 @@ class TaskListTemplateErrorItem(TaskListTemplateItem):
 
         raise ValueError(
                 'Aborting due to error statement at '
-                + self.tlt_loc
+                + str( self.tlt_loc )
                 + ': '
                 + inst_content )
