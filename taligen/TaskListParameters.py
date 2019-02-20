@@ -40,7 +40,7 @@ class TaskListParameters:
         """
         Parse the string and add the found key-value pairs
         """
-        TaskListParameters.parse_strings( re.split( '[,\s;]+', s ), self.pairs )
+        TaskListParameters.parse_strings( re.split( '(?<!\\\\)[,\s;]+', s ), self.pairs )
         return self
 
 
@@ -56,7 +56,7 @@ class TaskListParameters:
                 if len(splitlist) >=2:
                     pairs[splitlist[0].strip()] = splitlist[1].strip()
                 else:
-                    raise ValueError( "Error: cannot split "+arg+" into name=value")
+                    raise ValueError( "Error: cannot split " + s + " into name=value")
 
     def __str__( self ):
         """
