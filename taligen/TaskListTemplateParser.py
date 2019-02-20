@@ -47,27 +47,68 @@ class TaskListTemplateParser:
 
         fbase_with_period = fbase + '.'
 
-        def filt(c):
-            if not os.path.isfile( ( fdir + '/' + c ) if fdir else c ):
-                return False
-            if not c.startswith( fbase_with_period ):
-                return False
-            if not c.endswith( fext ): # contains period already
-                return False
-            return True
+        candidates = list()
+        dirs       = list()
 
-        candidates = list( filter( filt, os.listdir( fdir if fdir else '.' )))
+        # for foo.tlt, look in its directory, and for foo/foo.tlt
+        if fdir:
+            dirs.append( fdir )
+            if os.path.isdir( fdir + '/' + fbase ):
+                dirs.append( fdir + '/' + fbase )
+        else:
+            dirs.append( '.' )
+            if os.path.isdir( fbase ):
+                dirs.append( fbase )
+
+        for d in dirs:
+
+            def filt(c):
+                if not os.path.isfile( d + '/' + c ):
+                    return False
+                if not c.startswith( fbase_with_period ):
+                    return False
+                if not c.endswith( fext ): # contains period already
+                    return False
+                return True
+
+            candidates += map(
+                    lambda f: f if d == '.' else ( d + '/' + f ),
+                    filter( filt, os.listdir( d )))
 
         found = None
 
-        for candidate in sorted( candidates, key=lambda c: -c.count( '.' )):
+        def candidateQuality(c):
+            # Prefer fewer dots, but in doubt, shorter directories
+            # (that's where the times 2 comes from)
+            lastSlash = c.rfind( '/' )
+            if lastSlash == -1:
+                return -c.count( '.' ) * 2
+            else:
+                return -c.count( '.', lastSlash + 1 ) * 2 + 1
+
+        print( "XXX Looking for " + tlt_file )
+
+        sortedCandidates = sorted( candidates, key=candidateQuality )
+
+        for candidate in sortedCandidates:
+
+            print( "    Candidate " + candidate )
+
             # The first one that matches parameters is the best match
-            pairs = candidate[ len( fbase_with_period ) : -len( fext ) ]
+            lastSlash = candidate.rfind( '/' )
+            if lastSlash == -1:
+                pairs = candidate[ len( fbase_with_period ) : -len( fext ) ]
+            else:
+                pairs = candidate[ lastSlash + 1 + len( fbase_with_period ) : -len( fext ) ]
 
             if( len( pairs )):
                 matched_all = True
                 for pair in pairs.split( '.' ):
-                    ( key, value ) = pair.split( '=', 1 )
+                    try :
+                        ( key, value ) = pair.split( '=', 1 )
+                    except ValueError as e:
+                        print( 'Cannot split supposed key-value pair: ' + pair )
+                        raise e
 
                     # all of them have to match
                     if( not parameters.key_exists( key ) or parameters.get( key ) != value ):
@@ -79,14 +120,19 @@ class TaskListTemplateParser:
 
         if found == None:
             # Is there one with no parameters?
-            if fname in candidates:
-                found = tlt_file_base
-            else:
-                raise CannotFindTltFileException( tlt_file_base, parameters )
-        elif fdir:
-            found = fdir + '/' + found
+            for candidate in sortedCandidates:
+                lastSlash = candidate.rfind( '/' )
+                if lastSlash == -1:
+                    if candidate == fname:
+                        found = tlt_file_base
+                else:
+                    if candidate[ lastSlash+1 : ] == fname:
+                        found = candidate
 
-        return found
+            if found == None:
+                raise CannotFindTltFileException( tlt_file_base, parameters )
+
+        return os.path.normpath( found )
 
 
     def obtain_with_parameters( self, tlt_file_base, parameters, path='' ):
