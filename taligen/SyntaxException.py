@@ -17,4 +17,4 @@ class SyntaxException(BaseException):
         self.loc = loc
 
     def __str__( self ):
-        return 'Syntax error: ' + self.msg + '" at ' + str(self.loc)
+        return 'Syntax error: "' + self.msg + '" at ' + str(self.loc)
