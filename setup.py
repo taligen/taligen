@@ -9,7 +9,7 @@
 from setuptools import setup
 
 setup(name='taligen',
-      version='0.7',
+      version='0.8',
       description='Generate task lists which can be worked down using taliworkdown',
       url='http://github.com/taligen/taligen',
       packages=['taligen'])
