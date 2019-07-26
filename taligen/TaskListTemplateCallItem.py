@@ -40,7 +40,7 @@ class TaskListTemplateCallItem(TaskListTemplateItem):
         child_parameters = parameters.clone();
         child_parameters.add_from_string( args )
 
-        tlt = parser.obtain_with_parameters( function + '.tlt', child_parameters, self.tlt_loc.filename )
+        tlt = parser.obtain_with_parameters( function + '.tlt', child_parameters, self.tlt_loc.filename, myLocationStack )
         if tlt:
             tl = tlt.instantiate( child_parameters, parser, myLocationStack )
             items.append( SubTaskListItem( tl, self ))

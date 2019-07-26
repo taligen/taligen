@@ -61,7 +61,7 @@ def run():
     parser = TaskListTemplateParser()
 
     try:
-        tlt = parser.obtain_with_parameters( args.tlt_file, parameters )
+        tlt = parser.obtain_with_parameters( args.tlt_file, parameters, None, None )
         tl  = tlt.instantiate( parameters, parser )
 
         if tl.get_name():

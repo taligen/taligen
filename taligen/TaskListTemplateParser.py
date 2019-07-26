@@ -26,7 +26,7 @@ class TaskListTemplateParser:
         self.parsedFiles = {} # caches parsed files
 
 
-    def find_tlt_file( self, tlt_file, parameters, context_path ):
+    def find_tlt_file( self, tlt_file, parameters, context_path, locationStack ):
         """
         Find the most appropriate TLT file, given the provided filename
         (e.g. 'foo.tlt'), the current context (e.g. 'inc/sometfile.tlt'), and
@@ -126,17 +126,17 @@ class TaskListTemplateParser:
                         found = candidate
 
             if found == None:
-                raise CannotFindTltFileException( tlt_file_base, parameters )
+                raise CannotFindTltFileException( tlt_file_base, parameters, locationStack )
 
         return os.path.normpath( found )
 
 
-    def obtain_with_parameters( self, tlt_file_base, parameters, path='' ):
+    def obtain_with_parameters( self, tlt_file_base, parameters, path, locationStack ):
         """
         Find the correct TLT file given the path and the parameters,
         and return a parsed version of it
         """
-        tlt_file = self.find_tlt_file( tlt_file_base, parameters, path )
+        tlt_file = self.find_tlt_file( tlt_file_base, parameters, path, locationStack )
         if tlt_file:
             return self.obtain( tlt_file )
         else:
